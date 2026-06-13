@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-type Screen = "landing" | "register" | "captcha" | "creating" | "shop" | "product" | "cart" | "settings" | "admin" | "checkout";
+type Screen = "landing" | "login" | "register" | "captcha" | "creating" | "shop" | "product" | "cart" | "settings" | "admin" | "checkout";
 
 interface User {
   phone: string;
@@ -90,13 +90,16 @@ export default function Index() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>(() => {
-    try { return JSON.parse(localStorage.getItem("voltmall_users") || "[]"); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem("voltmall_users") || "[]"); } catch (_e) { return []; }
   });
 
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [regError, setRegError] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState("");
   const [captchaChecked, setCaptchaChecked] = useState(false);
   const [creatingProgress, setCreatingProgress] = useState(0);
 
@@ -160,11 +163,24 @@ export default function Index() {
     setScreen("creating");
   };
 
+  const handleLogin = () => {
+    setLoginError("");
+    if (!loginEmail.includes("@")) { setLoginError("Введите корректный email"); return; }
+    if (!loginPassword) { setLoginError("Введите пароль"); return; }
+    const found = users.find(u => u.email === loginEmail && u.password === loginPassword);
+    if (!found) { setLoginError("Неверный email или пароль"); return; }
+    setUser(found);
+    localStorage.setItem("voltmall_current", JSON.stringify(found));
+    setLoginEmail(""); setLoginPassword(""); setLoginError("");
+    setScreen("shop");
+  };
+
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("voltmall_current");
     setScreen("landing");
     setPhone(""); setEmail(""); setPassword("");
+    setLoginEmail(""); setLoginPassword("");
   };
 
   const handlePromo = () => {
@@ -261,11 +277,76 @@ export default function Index() {
         </div>
 
         <div className="relative z-10 flex flex-col items-center gap-4 animate-fade-in" style={{ animationDelay: "1.3s", animationFillMode: "both" }}>
-          <button onClick={() => setScreen("register")}
-            className="bg-yellow-300 text-[#001f5b] font-black text-lg px-12 py-4 rounded-2xl hover:bg-yellow-200 transition-all duration-200 hover:scale-105 shadow-2xl shadow-yellow-400/40">
-            Войти / Зарегистрироваться →
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button onClick={() => setScreen("login")}
+              className="bg-yellow-300 text-[#001f5b] font-black text-lg px-10 py-4 rounded-2xl hover:bg-yellow-200 transition-all duration-200 hover:scale-105 shadow-2xl shadow-yellow-400/40">
+              Войти →
+            </button>
+            <button onClick={() => setScreen("register")}
+              className="bg-white/15 backdrop-blur-sm text-white font-bold text-lg px-10 py-4 rounded-2xl border border-white/30 hover:bg-white/25 transition-all duration-200 hover:scale-105">
+              Создать аккаунт
+            </button>
+          </div>
           <p className="text-blue-200 text-sm opacity-80">Тысячи товаров • Лучшие цены • Быстрая доставка</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── LOGIN ───────────────────────────────────────────────────────────────────
+  if (screen === "login") {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${dk ? "bg-gray-950" : "bg-gradient-to-br from-blue-50 via-white to-blue-50"}`}>
+        <div className={`w-full max-w-md mx-4 rounded-3xl p-8 shadow-2xl animate-scale-in ${cardBg}`}>
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-3xl">⚡</span>
+            <span className="text-2xl font-black" style={{ fontFamily: "Golos Text, sans-serif" }}>
+              Volt<span className="text-blue-600">Mall</span>
+            </span>
+          </div>
+          <h2 className="text-2xl font-bold mb-1">Добро пожаловать!</h2>
+          <p className={`text-sm mb-6 ${dk ? "text-gray-400" : "text-gray-500"}`}>Войдите в свой аккаунт</p>
+
+          <div className="space-y-4">
+            <div>
+              <label className={`block text-sm font-medium mb-1.5 ${dk ? "text-gray-300" : "text-gray-700"}`}>Email</label>
+              <input value={loginEmail} onChange={e => setLoginEmail(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleLogin()}
+                placeholder="example@mail.ru" type="email" className={inputCls} />
+            </div>
+            <div>
+              <label className={`block text-sm font-medium mb-1.5 ${dk ? "text-gray-300" : "text-gray-700"}`}>Пароль</label>
+              <input value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleLogin()}
+                placeholder="Ваш пароль" type="password" className={inputCls} />
+            </div>
+
+            {loginError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-xl flex items-center gap-2">
+                <span>⚠️</span> {loginError}
+              </div>
+            )}
+
+            <button onClick={handleLogin}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] text-base">
+              Войти →
+            </button>
+
+            <div className={`relative flex items-center gap-3 ${dk ? "text-gray-600" : "text-gray-300"}`}>
+              <div className="flex-1 h-px bg-current" />
+              <span className={`text-xs ${dk ? "text-gray-500" : "text-gray-400"}`}>или</span>
+              <div className="flex-1 h-px bg-current" />
+            </div>
+
+            <button onClick={() => { setLoginError(""); setScreen("register"); }}
+              className={`w-full py-3 rounded-xl border-2 font-semibold text-sm transition-all ${dk ? "border-gray-700 text-gray-300 hover:border-blue-500 hover:text-blue-400" : "border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600"}`}>
+              Создать новый аккаунт
+            </button>
+          </div>
+
+          <button onClick={() => setScreen("landing")} className={`mt-5 text-sm w-full text-center ${dk ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"} transition-colors`}>
+            ← Вернуться на главную
+          </button>
         </div>
       </div>
     );
@@ -311,9 +392,15 @@ export default function Index() {
             </button>
           </div>
 
-          <button onClick={() => setScreen("landing")} className={`mt-5 text-sm w-full text-center ${dk ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"} transition-colors`}>
-            ← Вернуться на главную
-          </button>
+          <div className="mt-5 flex flex-col gap-2 items-center">
+            <button onClick={() => { setRegError(""); setScreen("login"); }}
+              className={`text-sm font-medium ${dk ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"} transition-colors`}>
+              Уже есть аккаунт? Войти →
+            </button>
+            <button onClick={() => setScreen("landing")} className={`text-sm ${dk ? "text-gray-500 hover:text-gray-300" : "text-gray-400 hover:text-gray-600"} transition-colors`}>
+              ← Вернуться на главную
+            </button>
+          </div>
         </div>
       </div>
     );
