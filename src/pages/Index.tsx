@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import Icon from "@/components/ui/icon";
+import { YandexLoginButton } from "@/components/extensions/yandex-auth/YandexLoginButton";
+import { useYandexAuth } from "@/components/extensions/yandex-auth/useYandexAuth";
+
+const YANDEX_AUTH_URL = "https://functions.poehali.dev/b9eb14dd-44e2-4b02-8e2d-842ae754f242";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Screen = "landing" | "login" | "register" | "captcha" | "creating" | "shop" | "product" | "cart" | "settings" | "admin" | "checkout";
@@ -119,6 +123,15 @@ export default function Index() {
   const [adminInput, setAdminInput] = useState("");
   const [logsExpanded, setLogsExpanded] = useState(false);
   const logsRef = useRef<HTMLDivElement>(null);
+
+  const yandexAuth = useYandexAuth({
+    apiUrls: {
+      authUrl: `${YANDEX_AUTH_URL}?action=auth-url`,
+      callback: `${YANDEX_AUTH_URL}?action=callback`,
+      refresh: `${YANDEX_AUTH_URL}?action=refresh`,
+      logout: `${YANDEX_AUTH_URL}?action=logout`,
+    },
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem("voltmall_current");
@@ -337,6 +350,12 @@ export default function Index() {
               <span className={`text-xs ${dk ? "text-gray-500" : "text-gray-400"}`}>или</span>
               <div className="flex-1 h-px bg-current" />
             </div>
+
+            <YandexLoginButton
+              onClick={yandexAuth.login}
+              isLoading={yandexAuth.isLoading}
+              className="w-full py-3.5 text-base font-bold rounded-xl"
+            />
 
             <button onClick={() => { setLoginError(""); setScreen("register"); }}
               className={`w-full py-3 rounded-xl border-2 font-semibold text-sm transition-all ${dk ? "border-gray-700 text-gray-300 hover:border-blue-500 hover:text-blue-400" : "border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600"}`}>
