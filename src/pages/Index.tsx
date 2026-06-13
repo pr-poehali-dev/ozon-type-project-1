@@ -410,6 +410,19 @@ export default function Index() {
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all duration-200 hover:scale-[1.02] text-base">
               Продолжить →
             </button>
+
+            <div className={`relative flex items-center gap-3 ${dk ? "text-gray-600" : "text-gray-300"}`}>
+              <div className="flex-1 h-px bg-current" />
+              <span className={`text-xs ${dk ? "text-gray-500" : "text-gray-400"}`}>или быстрая регистрация</span>
+              <div className="flex-1 h-px bg-current" />
+            </div>
+
+            <YandexLoginButton
+              onClick={yandexAuth.login}
+              isLoading={yandexAuth.isLoading}
+              buttonText="Зарегистрироваться через Яндекс"
+              className="w-full py-3.5 text-base font-bold rounded-xl"
+            />
           </div>
 
           <div className="mt-5 flex flex-col gap-2 items-center">
