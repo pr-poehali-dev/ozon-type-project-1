@@ -188,7 +188,8 @@ export default function Index() {
     setScreen("shop");
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await yandexAuth.logout();
     setUser(null);
     localStorage.removeItem("voltmall_current");
     setScreen("landing");
@@ -745,10 +746,14 @@ export default function Index() {
             </a>
           </div>
 
-          <button onClick={handleLogout}
-            className={`w-full py-3.5 rounded-xl border-2 font-semibold transition-all text-sm ${dk ? "border-red-900 text-red-400 hover:bg-red-950" : "border-red-200 text-red-500 hover:bg-red-50"}`}>
-            Выйти из аккаунта
-          </button>
+          <div className={`rounded-2xl p-5 ${cardBg} shadow-sm`}>
+            <h3 className={`font-bold mb-1 ${dk ? "text-gray-200" : "text-gray-800"}`}>Выход из аккаунта</h3>
+            <p className={`text-xs mb-4 ${dk ? "text-gray-500" : "text-gray-400"}`}>Вы выйдете на всех устройствах</p>
+            <button onClick={handleLogout}
+              className="w-full py-3.5 rounded-xl font-bold text-base bg-red-500 hover:bg-red-600 text-white transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-red-200 flex items-center justify-center gap-2">
+              <span>🚪</span> Выйти из аккаунта
+            </button>
+          </div>
         </div>
       </div>
     );
